@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="src/ApiHost/ApiHost.csproj" />
+  <Project Path="src/Aspire.AppHost/Aspire.AppHost.csproj" />
+  <Project Path="src/Aspire.ServiceDefaults/Aspire.ServiceDefaults.csproj" />
+  <Project Path="src/client-app/client-app.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="tests/Tests/Tests.csproj" />
+</Solution>

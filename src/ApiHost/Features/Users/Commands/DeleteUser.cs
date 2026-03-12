@@ -8,16 +8,18 @@ namespace ApiHost.Users;
 public class DeleteUser
 {
     [WolverineDelete("users/{id}")]
-    public async Task<(IResult, UserDeleted?)> Delete(Guid id, IDocumentSession session)
+    public async Task<IResult> Delete(Guid id, IDocumentSession session, IMessageBus bus)
     {
         var user = await session.LoadAsync<User>(id);
         if (user == null)
         {
-            return (Results.NotFound(), null);
+            return Results.NotFound();
         }
+
         var evt = user.MarkDelete();
         session.Delete(user);
         session.Events.Append(id, evt);
-        return (Results.NoContent(), evt);
+        await bus.PublishAsync(evt);
+        return Results.NoContent();
     }
 }

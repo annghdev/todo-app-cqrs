@@ -18,17 +18,12 @@ dotnet test tests/Tests/Tests.csproj `
 ## Suggested CI quality gate
 
 - Test job fails on any failed test.
-- Coverage gate starts at **50% line coverage** for `src/ApiHost` and increases over time.
+- Coverage gate is stepped up to **53% total line coverage**.
+- Additional module gate: **ApiHost >= 52% line coverage**.
 - Use this command in CI:
 
 ```powershell
-dotnet test tests/Tests/Tests.csproj `
-  /p:CollectCoverage=true `
-  /p:CoverletOutputFormat=cobertura `
-  /p:CoverletOutput=./TestResults/coverage/ `
-  /p:Threshold=50 `
-  /p:ThresholdType=line `
-  /p:ThresholdStat=total
+powershell -ExecutionPolicy Bypass -File tests/Tests/run-backend-tests.ps1
 ```
 
 ## Notes

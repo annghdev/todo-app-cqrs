@@ -27,18 +27,25 @@ var martenRegistration = builder.Services.AddMarten(opts =>
 {
     opts.Connection(builder.Configuration.GetConnectionString("tododb")!);
 
+    // Tách schema theo từng module
+    opts.Schema.For<TopicView>().DatabaseSchemaName("topic");
+    opts.Schema.For<UserView>().DatabaseSchemaName("users");
+
+    // Tách schema cho event store/projections của Marten
+    opts.Events.DatabaseSchemaName = "events";
+
     // Full text search support
     opts.Schema.For<TopicView>().FullTextIndex(x => x.Title);
-
-    opts.Schema.For<UserView>().NgramIndex(x => x.FullName);
-
-    // Hỗ trợ xử lý tiếng Việt không dấu (Unaccent)
-    opts.Advanced.UseNGramSearchWithUnaccent = true;
+    opts.Schema.For<UserView>().FullTextIndex(x => x.FullName);
 
     opts.Projections.Add<TopicProjection>(projectionLifecycle);
     opts.Projections.Add<UserProjection>(projectionLifecycle);
 })
-    .IntegrateWithWolverine();
+    .IntegrateWithWolverine(x =>
+    {
+        x.MessageStorageSchemaName = "wolverine";
+        x.TransportSchemaName = "wolverine";
+    });
 
 if (!builder.Environment.IsEnvironment("Testing"))
 {
@@ -51,7 +58,7 @@ builder.Host.UseWolverine(opts =>
 {
     opts.UseFluentValidation();
     opts.Policies.AutoApplyTransactions();
-    opts.Policies.AddMiddleware<LoggingMiddleware>();
+    //opts.Policies.AddMiddleware<LoggingMiddleware>();
 });
 
 // Add services to the container.

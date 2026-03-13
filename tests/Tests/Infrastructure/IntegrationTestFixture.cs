@@ -73,14 +73,18 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         const string truncateSql = """
             DO $$
             DECLARE
-                table_name text;
+                rec record;
             BEGIN
-                FOR table_name IN
-                    SELECT tablename
+                FOR rec IN
+                    SELECT schemaname, tablename
                     FROM pg_tables
-                    WHERE schemaname = 'public'
+                    WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
                 LOOP
-                    EXECUTE 'TRUNCATE TABLE public.' || quote_ident(table_name) || ' CASCADE';
+                    EXECUTE format(
+                        'TRUNCATE TABLE %I.%I CASCADE',
+                        rec.schemaname,
+                        rec.tablename
+                    );
                 END LOOP;
             END $$;
             """;

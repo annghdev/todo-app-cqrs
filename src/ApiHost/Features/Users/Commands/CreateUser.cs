@@ -24,7 +24,7 @@ public class CreateUser
     {
         var user = new User(command.FirstName, command.LastName);
         var evt = new UserCreated(user.Id, user.DisplayName, user.FullName);
-        return (user, MartenOps.StartStream<UserView>(user.Id, evt));
+        return (user, MartenOps.StartStream<User>(user.Id, evt));
     }
 
     public class Validator : AbstractValidator<CreateUserCommand>

@@ -1,0 +1,23 @@
+# Prometheus Configuration cho TodoAppCQRS
+global:
+  scrape_interval: 15s       # Scrape metrics mỗi 15 giây
+  evaluation_interval: 15s   # Evaluate rules mỗi 15 giây
+
+scrape_configs:
+  # Scrape metrics từ ApiHost endpoint /metrics
+  # ⚠️ PORT: Khi chạy trực tiếp (dotnet run), port mặc định là 5285
+  #          Khi chạy qua Aspire AppHost, port được gán ĐỘNG → xem Aspire Dashboard để biết port
+  #          Cập nhật targets bên dưới cho đúng port
+  - job_name: 'todoapp-api'
+    static_configs:
+      - targets: ['host.docker.internal:5285']
+        labels:
+          app: 'TodoAppCQRS'
+          environment: 'development'
+    metrics_path: '/metrics'
+    scheme: 'http'
+
+  # Prometheus tự scrape chính nó (monitoring health)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

@@ -1,7 +1,9 @@
 using ApiHost;
+using ApiHost.Middlewares;
 using JasperFx.Events.Projections;
 using Marten;
 using Scalar.AspNetCore;
+using Serilog;
 using Wolverine;
 using Wolverine.FluentValidation;
 using Wolverine.Http;
@@ -9,6 +11,12 @@ using Wolverine.Http.FluentValidation;
 using Wolverine.Marten;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cấu hình Serilog thay thế default logger của ASP.NET Core
+builder.Host.UseSerilog((context, loggerConfig) =>
+{
+    loggerConfig.ReadFrom.Configuration(context.Configuration);
+});
 
 builder.AddServiceDefaults();
 var projectionLifecycle = builder.Environment.IsEnvironment("Testing")
@@ -43,6 +51,7 @@ builder.Host.UseWolverine(opts =>
 {
     opts.UseFluentValidation();
     opts.Policies.AutoApplyTransactions();
+    opts.Policies.AddMiddleware<LoggingMiddleware>();
 });
 
 // Add services to the container.
@@ -50,6 +59,9 @@ builder.Host.UseWolverine(opts =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Serilog HTTP request logging — ghi log mỗi HTTP request với StatusCode, Elapsed, Path
+app.UseSerilogRequestLogging();
 
 app.MapDefaultEndpoints();
 
